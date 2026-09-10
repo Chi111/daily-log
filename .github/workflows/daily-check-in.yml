@@ -1,0 +1,32 @@
+name: Daily check-in
+
+on:
+  schedule:
+    # 09:17 Asia/Shanghai. GitHub may delay scheduled runs.
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-check-in
+  cancel-in-progress: false
+
+jobs:
+  check-in:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Configure commit author
+        run: |
+          git config user.name 'Chi111'
+          git config user.email '60536241+Chi111@users.noreply.github.com'
+      - name: Create remaining daily check-ins
+        run: python3 scripts/check_in.py
+      - name: Push check-ins
+        run: git push origin HEAD:main
